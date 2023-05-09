@@ -1,7 +1,7 @@
 /**Импорт всех требуемых модулей. */
 const fs = require('fs');
 const path = require('path');
-const readline = require("readline");
+const readline = require('readline');
 
 
 const rl = readline.createInterface({
@@ -22,10 +22,11 @@ function writeToFile(data) {
 /**Вывод в консоль приветственного сообщения.  Ожидание ввода текста пользователем, с дальнейшей */
 function waitForInput() {
   rl.question('Приветствую тебя, падаван! Можешь оставить свое пожелание или введи exit, чтобы выйти:\n ', inputData => {
-  /**проверкa ввода на наличие ключевого слова exit*/
-    if (inputData.toLowerCase() === "exit") {
+
+    /**проверкa ввода на наличие ключевого слова exit*/
+    if (inputData.toLowerCase() === 'exit') {
       /**Реализация прощального сообщения при остановке процесса */
-      console.log("Да пребудет с тобой Сила");
+      console.log('Да пребудет с тобой Сила');
       process.exit(0);
     } else {
       /**Запись текста в файл */
@@ -38,4 +39,11 @@ fs.writeFile(fileName, '', err => {
   if (err) throw err;
   waitForInput();
 });
+rl.on('close', () => {
+  console.log('\n\nДо свидания, и да пребудет с тобой Сила!');
+  process.exit(0);
+});
+
+
+
 
