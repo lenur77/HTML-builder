@@ -9,6 +9,7 @@ function mergeStyles(source, target) {
   /**Чтение содержимого папки styles*/
   fs.readdir(source, (err, files) => {
     if (err) throw err;
+    
     /**Проверка является ли объект файлом и имеет ли файл нужное расширение */
 
     function readMergedFiles(files, source, extname) {
@@ -36,7 +37,8 @@ function mergeStyles(source, target) {
       });
     }
     readMergedFiles(files, sourceDir, '.css');
-  }
+  });
+}
 
-  );}
 mergeStyles(sourceDir, targetDir);
+

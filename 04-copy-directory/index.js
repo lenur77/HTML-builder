@@ -4,24 +4,8 @@ const path = require('path');
 const sourceDir = path.resolve(__dirname, 'files');
 const targetDir = path.resolve(__dirname, 'files-copy');
 
-async function deleteFolder(dirPath) {
-  try {
-    const files = await fs.readdir(dirPath, { withFileTypes: true });
-    for (const file of files) {
-      const currentPath = path.resolve(dirPath, file.name);
-      if (file.isDirectory()) {
-        await deleteFolder(currentPath);
-      } else {
-        await fs.unlink(currentPath);
-      }
-    }
-    await fs.rmdir(dirPath);
-  } catch (error) {
-      throw error;
-  }
-}
-
 async function copyDir(source, target) {
+  await fs.rm(target, { recursive: true, force: true });
   fs.mkdir(target, { recursive: true });
 
   /**Чтение содержимого папки files */
@@ -40,15 +24,9 @@ async function copyDir(source, target) {
       }
     }
   } catch (error) {
-      throw error;
+    console.error(error.message);
   }
 }
 
-async function main() {
-  await deleteFolder(targetDir);
-  await copyDir(sourceDir, targetDir);
-}
+copyDir(sourceDir, targetDir);
 
-main().catch(error => {
-  console.error('Error:', error);
-});

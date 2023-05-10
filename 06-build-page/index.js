@@ -9,6 +9,7 @@ const templatePath = path.resolve(__dirname, 'template.html');
 const distPath = path.resolve(__dirname, 'project-dist');
 const distAssetsPath = path.resolve(__dirname, 'project-dist', 'assets');
 
+
 async function createHtml(source, target) {
   try {
     fs.mkdir(source, { recursive: true }, err => {
@@ -34,32 +35,28 @@ async function createHtml(source, target) {
   }
 }
 
-function copyDir(source, target) {
-  FS.mkdir(target, { recursive: true }, err => {
-    if (err) throw err;
-    /**Чтение содержимого папки files */
-    FS.readdir(source, { withFileTypes: true }, (err, files) => {
-      if (err) throw err;
-      files.forEach(file => {
-        const sourcePath = path.resolve(source, file.name);
-        const targetPath = path.resolve(target, file.name);
+async function copyDir(source, target) {
+  await fs.rm(target, { recursive: true, force: true });
+  fs.mkdir(target, { recursive: true });
 
-        /** Получение информации о файле (это папка или файл)*/
-        FS.stat(sourcePath, (err, stats) => {
-          if (err) throw err;
-          if (stats.isDirectory()) {
-            /**Создание папки в папке files-copy, если она есть */
-            copyDir(sourcePath, targetPath);
-          } else {
-            /**Копирование файлов из папки files в папку files-copy */
-            FS.copyFile(sourcePath, targetPath, err => {
-              if (err) throw err;
-            });
-          }
-        });
-      });
-    });
-  });
+  /**Чтение содержимого папки files */
+  try {
+    const files = await fs.readdir(source, { withFileTypes: true });
+    for (const file of files) {
+      const sourcePath = path.resolve(source, file.name);
+      const targetPath = path.resolve(target, file.name);
+      /** Получение информации о файле (это папка или файл)*/
+      if (file.isDirectory()) {
+        /**Создание папки в папке files-copy, если она есть */
+        copyDir(sourcePath, targetPath);
+      } else {
+        /**Копирование файлов из папки files в папку files-copy */
+        await fs.copyFile(sourcePath, targetPath);
+      }
+    }
+  } catch (error) {
+    console.error(error.message);
+  }
 }
 
 function mergeStyles(source, target) {
@@ -93,6 +90,14 @@ function mergeStyles(source, target) {
     readMergedFiles(files, stylesPath, '.css');
   });
 }
-createHtml(distPath, componentsPath);
-copyDir(assetsPath, distAssetsPath);
-mergeStyles(stylesPath, distPath);
+async function main() {
+  // await deleteFolder(distAssetsPath);
+  await copyDir(assetsPath, distAssetsPath);
+  mergeStyles(stylesPath, distPath);
+  await createHtml(distPath, componentsPath);
+
+}
+
+main().catch(error => {
+  console.error('Error:', error);
+});
